@@ -3,23 +3,41 @@ import Avengers from '../../resurses/img/Avengers.png';
 import AvengersLogo from "../../resurses/img/Avengers_logo.png";
 import { useEffect, useState} from 'react';
 import useMarvelServise from '../servise/MarvelServis';
-import setContent from '../../utils/setContent';
 import { Link } from 'react-router-dom';
+import ErrorMesange from '../errorMasange/ErrorMesange';
+import Spinner from '../spinner/Spinner';
+
+
 
 function ComicsContent ({onChangeComics}){
 
     const [comics, setComics] = useState([])
-    const [loadComics, setLoadComics]= useState(true)
     const [offset, setOffset] = useState(0)
-    const {error,getAllComics, clearError,process,setProcess} = useMarvelServise()
     const [newItemComics, setNewComics] = useState(true)
     const [comicsEnd, setComicsEnd] = useState(false)
 
+    const {error,getAllComics, clearError,process,setProcess} = useMarvelServise()
+
+    const setContent = (process, Component ,newItemComics)=>{
+
+        switch(process){
+            case 'waiting':
+                return <Spinner/>
+            case 'loading':
+                return newItemComics ?  <Component/> : <Spinner/>
+            case 'confirmed':
+                return <Component/>
+            case 'error':
+                return <ErrorMesange/>
+            default: 
+                throw new Error('Unexpected process state')
+        }
+    }
+    
 
 
     useEffect(()=>{
         onComicsAdd(offset, true);
-        
     },[])
 
 
@@ -30,19 +48,20 @@ function ComicsContent ({onChangeComics}){
             endComics = true
         }
         setComics(data => [...data,...newData]);
-        comics.length > 1 ? setLoadComics(false) : setLoadComics(true)
+        setNewComics(false)
         setOffset(offset => offset + 8);
-        setComicsEnd(comicsEnd => endComics);
-        setNewComics(newItemComics => false);
+        setComicsEnd(endComics);
+      
     }
 
     const onComicsAdd = (offset, initial)=>{
-        setNewComics(newItemComics => true);
-        if(error){
-            clearError()
-        }
-        initial ? setLoadComics(true) : setLoadComics(false)
-        getAllComics(offset).then(onComicsload).then(setProcess('confirmed')).catch(()=>setNewComics( newItemComics=>false));
+      
+        initial ? setNewComics(false) : setNewComics(true)
+
+        getAllComics(offset)
+        .then(onComicsload)
+        .then(()=>setContent('confirmed'))
+
     }
     
     const ComicsList = (comics)=>{
@@ -84,7 +103,7 @@ function ComicsContent ({onChangeComics}){
             </div>
             <div className="comics__list">
                    {
-                   setContent(process,()=>ComicsList(comics))
+                   setContent(process,()=>ComicsList(comics), newItemComics)
                    }
                 
                 <button onClick={()=> onComicsAdd(offset)}

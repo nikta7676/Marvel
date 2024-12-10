@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Formik, Form, Field, ErrorMessage as FormikErrorMassange } from 'formik';
 import useMarvelServise from '../servise/MarvelServis';
-import {Link} from 'react-router-dom';
+import {Link} from 'react-router-dom'
 import '../charSearch/charSearch.scss';
 import ErrorMesange from '../errorMasange/ErrorMesange';
 
@@ -9,7 +9,7 @@ import ErrorMesange from '../errorMasange/ErrorMesange';
 function CharSearch(){
 
     const [char, setChar] = useState(null);
-    const {loading, error, getCharacterName, clearError} = useMarvelServise();
+    const { getCharacterName, clearError} = useMarvelServise();
 
     const onCharLoaded = (char)=>{
         setChar(char); 

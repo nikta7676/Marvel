@@ -1,8 +1,8 @@
 import "./RandomChar.scss";
+import mjolnir from '../../resurses/img/mjolnir.png';
 import {useState, useEffect} from "react";
 import  useMarvelServise from '../servise/MarvelServis';
-import Spinner from '../spinner/Spinner';
-import ErrorMesange from "../errorMasange/ErrorMesange";
+
 import setContent from "../../utils/setContent";
 
 
@@ -87,7 +87,7 @@ function RandomChar (){
                             <button onClick={updateChar} className="button button__main">
                                 <div className="inner">try it</div>
                             </button>
-                            <img src='' alt="mjolnir" className="randomchar__secondary"/>
+                            <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
                         </div>
             </div>
         )

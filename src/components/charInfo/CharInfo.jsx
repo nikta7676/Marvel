@@ -7,6 +7,8 @@ function CharInfo (props){
 
     const [char, setChar] = useState(null);
     const {clearError, getCharacter,process,setProcess} = useMarvelServise();
+
+
     
     useEffect(()=>{
         updateAllChar();

@@ -1,38 +1,49 @@
-
+import Spinner from '../spinner/Spinner';
+import ErrorMesange from '../errorMasange/ErrorMesange';
 import PropTypes from 'prop-types';
 import useMarvelServise from '../servise/MarvelServis';
-import {useState, useEffect, useRef} from 'react';
+import {useState, useEffect, useRef, useMemo} from 'react';
 import { CSSTransition, TransitionGroup} from 'react-transition-group';
-
-import setContent from '../../utils/setContent';
-
 
 function CharContent (props){
     
     const [char, setChar] = useState([]);
-   /*  const [newCharListLoading, setNewCharList] = useState(true); */
     const [offset, setOffset] = useState(210);
     const [ended, setEnded] = useState(false);
-    const [charEnd, setCharEnd] = useState(true)
+    const [charEnd, setCharEnd] = useState(false)
 
+    const setContent = (process, Component ,newItemComics)=>{
+
+        switch(process){
+            case 'waiting':
+                return <Spinner/>
+            case 'loading':
+                return newItemComics ?  <Component/> : <Spinner/>
+            case 'confirmed':
+                return <Component/>
+            case 'error':
+                return <ErrorMesange/>
+            default: 
+                throw new Error('Unexpected process state')
+        }
+    }
     
 
     useEffect(()=>{
         onCharAdd(offset, true)
     },[])   
     
-    const {error, clearError, getAllCharacters,process,setProcess} = useMarvelServise()
+    const {getAllCharacters,process,setProcess} = useMarvelServise()
 
     const onCharAllLoaded = (newChar)=>{
         let end = false;
         if(newChar.length < 9){
             end = true;
         }
-       /*  setNewCharList(false) */
         setChar(char => [...char, ...newChar])
         setOffset(offset=> offset + 9);
-        setEnded(ended => end);
-        setCharEnd(charEnd => false)
+        setEnded(end);
+        setCharEnd(false);
     }
 
     
@@ -40,15 +51,11 @@ function CharContent (props){
 
    const onCharAdd = (offset, initial)=>{
         
-        setCharEnd(charEnd => true)
-        if(error){
-            clearError();
-        }
-        /* initial ? setNewCharList(false) : setNewCharList(true) */
+        initial ? setCharEnd(false) : setCharEnd(true)
+
         getAllCharacters(offset)
            .then(onCharAllLoaded)
-           .then(setProcess('confirmed'))
-           .catch(()=> setCharEnd(charEnd =>false)) 
+           .then(()=>setProcess('confirmed')) 
         }
     
  
@@ -59,7 +66,7 @@ function CharContent (props){
         itemsRef.current[id].focus();
     }
 
-    const li = (char)=>{
+    const li = char =>{
         
         const content = char.map((item, i) =>{
     
@@ -97,12 +104,15 @@ function CharContent (props){
           )
         }
 
-
-   
+        const elements = useMemo(()=>{
+            return setContent(process, () => li(char), charEnd)},
+             // eslint-disable-next-line
+        [process])
        
         return( 
         <div className="char__list">
-         {  setContent(process,() => li(char))}  
+         {elements}  
+
             <button className="button button__main button__long"
             disabled = {charEnd}
             style={{'display': ended ? 'none' : 'block'}}
